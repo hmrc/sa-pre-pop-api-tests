@@ -19,9 +19,9 @@ package stepDefs
 import io.cucumber.scala.{EN, ScalaDsl}
 import models.{IndividualEmployment, IndividualEmploymentResponse}
 import org.scalatest.matchers.should.Matchers
-import pages.CreateTestUser.createTestUserBenefits
-import pages.GetIndividualEmployment.*
-import pages.LocalBearerGenerator
+import requests.CreateTestUser.createTestUserBenefits
+import requests.GetIndividualEmployment.*
+import requests.{GetIndividualEmployment, LocalBearerGenerator}
 import play.api.libs.json.JsString
 
 class IndividualEmploymentStepDefs extends ScalaDsl with EN with Matchers {
@@ -62,8 +62,9 @@ class IndividualEmploymentStepDefs extends ScalaDsl with EN with Matchers {
   Then(
     """^I should get the (.*) success status when calling individual-employment with UTR: (.*) and tax year: (.*) for scenario: (.*)$"""
   ) { (statusCode: Int, utr: String, taxYear: String, scenario: String) =>
-    val response                                                   = getIndividualEmploymentResponse(utr, taxYear)(headers: _*)
-    val jsonResponseData                                           = response.data
+    val response         = new GetIndividualEmployment().getIndividualEmploymentResponse(utr, taxYear)
+    val jsonResponseData = response.data
+
     val individualEmploymentResponse: IndividualEmploymentResponse = jsonResponseData.as[IndividualEmploymentResponse]
 
     assert(statusCode == response.status, s"Expected status code $statusCode but got ${response.status}")
@@ -83,9 +84,10 @@ class IndividualEmploymentStepDefs extends ScalaDsl with EN with Matchers {
     val response       =
       statusCode match {
         case NOT_ACCEPTABLE =>
-          getIndividualEmploymentResponse(utr, taxYear)("Authorization" -> LocalBearerGenerator.authBearerToken)
+          new GetIndividualEmployment(headers = Seq("Authorization" -> LocalBearerGenerator.authBearerToken))
+            .getIndividualEmploymentResponse(utr, taxYear)
         case _              =>
-          getIndividualEmploymentResponse(utr, taxYear)(headers: _*)
+          new GetIndividualEmployment().getIndividualEmploymentResponse(utr, taxYear)
       }
 
     val jsonResponseData = response.data

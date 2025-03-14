@@ -16,20 +16,28 @@
 
 package http
 
-import config.Zap
-import org.apache.pekko.actor.ActorSystem
-import play.api.libs.ws.StandaloneWSRequest
-import play.api.libs.ws.ahc.StandaloneAhcWSClient
+import play.api.libs.ws.StandaloneWSResponse
+import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
 
-object HttpClient {
+trait HttpPostRequest extends HttpRequest {
 
-  implicit val actorSystem: ActorSystem = ActorSystem()
-  val httpClient: StandaloneAhcWSClient = StandaloneAhcWSClient()
+  override def executeRestWithBodyCall(url: String, body: String): StandaloneWSResponse = {
+    logger.info(s"Executing POST request, on url=$url with body=$body")
 
-  def createRequest(url: String): StandaloneWSRequest = {
-    val req = httpClient.url(url)
+    val response = await(
+      HttpClient
+        .createRequest(url)
+        .withHttpHeaders(headers: _*)
+        .post(body)
+    )
 
-    Zap.getProxyIfEnabled.map(req.withProxyServer(_)).getOrElse(req)
+    printResponse(response)
+
+    response
   }
+
+  override def executeRestCall(url: String): StandaloneWSResponse = throw new UnsupportedOperationException(
+    "Not supported"
+  )
 
 }

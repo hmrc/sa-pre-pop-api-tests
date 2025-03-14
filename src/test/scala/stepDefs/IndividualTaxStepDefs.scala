@@ -19,8 +19,9 @@ package stepDefs
 import io.cucumber.scala.{EN, ScalaDsl}
 import models.{IndividualTaxEmployment, IndividualTaxResponse, Refund, StateBenefits}
 import org.scalatest.matchers.should.Matchers
-import pages.CreateTestUser.createTestUserBenefits
-import pages.GetIndividualTax.*
+import requests.CreateTestUser.createTestUserBenefits
+import requests.GetIndividualTax
+import requests.GetIndividualTax.*
 import play.api.libs.json.{JsString, JsValue}
 
 class IndividualTaxStepDefs extends ScalaDsl with EN with Matchers {
@@ -49,7 +50,7 @@ class IndividualTaxStepDefs extends ScalaDsl with EN with Matchers {
   Then(
     """^I should get the '(.*)' success status when calling individual-tax with UTR:'(.*)' and tax year: '(.*)' for scenario: '(.*)'$"""
   ) { (statusCode: Int, utr: String, taxYear: String, scenario: String) =>
-    val response = getIndividualTaxResponse(utr, taxYear)(headers: _*)
+    val response = new GetIndividualTax().getIndividualTaxResponse(utr, taxYear)
     statusCode shouldBe response.status
 
     val parsedBody = response.data.as[IndividualTaxResponse]
@@ -65,8 +66,8 @@ class IndividualTaxStepDefs extends ScalaDsl with EN with Matchers {
     (statusCode: Int, responseCode: String, responseMessage: String, utr: String, taxYear: String) =>
       val response =
         statusCode match {
-          case 406 => getIndividualTaxResponse(utr, taxYear)()
-          case _   => getIndividualTaxResponse(utr, taxYear)(headers: _*)
+          case 406 => new GetIndividualTax(headers = Seq.empty).getIndividualTaxResponse(utr, taxYear)
+          case _   => new GetIndividualTax().getIndividualTaxResponse(utr, taxYear)
         }
 
       val jsonData: JsValue = response.data

@@ -14,37 +14,25 @@
  * limitations under the License.
  */
 
-package pages
+package requests
 
 import config.Configuration
+import http.HttpGetRequest
 import models.Response
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should.Matchers
 import play.api.libs.json.{JsValue, Json}
-import http.HttpClient.*
 
-object GetIndividualEmployment extends Matchers with ScalaFutures with IntegrationPatience {
+class GetIndividualTax(
+  val headers: Seq[(String, String)] = Seq(
+    ("Accept", "application/vnd.hmrc.1.1+json"),
+    ("Authorization", LocalBearerGenerator.authBearerToken)
+  )
+) extends HttpGetRequest {
 
-  def headers: Seq[(String, String)] =
-    Seq(
-      "Accept"        -> "application/vnd.hmrc.1.2+json",
-      "Authorization" -> LocalBearerGenerator.authBearerToken
-    )
-
-  def getIndividualEmploymentResponse(utr: String, taxYear: String)(headers: (String, String)*): Response = {
-
-    val getURL = s"${Configuration.settings.APP_EMPLOYMENT_ROOT}/sa/$utr/annual-summary/$taxYear"
-
-    val response =
-      createRequest(getURL)
-        .withHttpHeaders(headers: _*)
-        .get()
-        .futureValue
-
+  def getIndividualTaxResponse(utr: String, taxYear: String): Response = {
+    val url                  = s"${Configuration.settings.APP_TAX_ROOT}/sa/$utr/annual-summary/$taxYear"
+    val response             = executeRestCall(url)
     val jsonResponse: String = response.body
     val data: JsValue        = Json.parse(jsonResponse)
-
-    printResponse(response)
 
     Response(response.status, data)
   }

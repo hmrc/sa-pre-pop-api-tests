@@ -14,18 +14,25 @@
  * limitations under the License.
  */
 
-package stepDefs
+package requests
 
-import io.cucumber.scala.{EN, ScalaDsl}
-import models.BearerTokenType
-import org.scalatest.matchers.should.*
-import requests.LocalBearerGenerator.obtainBearerToken
+import config.Configuration
+import http.HttpPostRequest
 
-class BearerTokenStepDefs extends ScalaDsl with EN with Matchers {
+object CreateTestUser extends HttpPostRequest {
 
-  Given("""^I have generated a bearer token (.*) for the UTR '(.*)'$""") { (bearerToken: String, utr: String) =>
-    val bearerEnum = BearerTokenType.valueOf(bearerToken)
-    obtainBearerToken(bearerEnum, utr)
+  override def headers: Seq[(String, String)] = Seq(
+    ("Accept", "application/vnd.hmrc.1.0+json"),
+    ("Content-Type", "application/json")
+  )
+
+  def createTestUserBenefits(utr: String, taxYear: String, scenario: String, urlPath: String): Int = {
+    val url  = s"${Configuration.settings.STUB_ROOT}/sa/$utr/$urlPath/annual-summary/$taxYear"
+    val body = s"""{
+                  |"scenario": "$scenario"
+                  |}""".stripMargin
+
+    executeRestWithBodyCall(url, body).status
   }
 
 }

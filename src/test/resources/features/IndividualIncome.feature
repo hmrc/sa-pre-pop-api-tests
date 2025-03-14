@@ -22,7 +22,7 @@ Feature:  Local - As Individual-Income api consumer I should be able to view all
       |            | 2017-18 | 404        | NOT_FOUND             | Resource was not found                    | Valid       | HAPPY_PATH_1  |
       | 1097172564 | 2017-19 | 400        | TAX_YEAR_INVALID      | The provided Tax Year is invalid          | Valid       | HAPPY_PATH_1  |
       | 1097172564 | 2017-18 | 401        | UNAUTHORIZED          | Bearer token is missing or not authorized | Missing     | HAPPY_PATH_1  |
-      | 1097172564 | 2017-18 | 401        | UNAUTHORIZED          | Bearer token is missing or not authorized | INVALID     | HAPPY_PATH_1  |
+      | 1097172564 | 2017-18 | 401        | UNAUTHORIZED          | Bearer token is missing or not authorized | Invalid     | HAPPY_PATH_1  |
       | 1097172564 | 2017-18 | 406        | ACCEPT_HEADER_INVALID | The accept header is missing or invalid   | Valid       | HAPPY_PATH_1  |
 
   Scenario Outline: validate error response from individual-income api call - new/different user
