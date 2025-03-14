@@ -1,0 +1,10 @@
+{
+  "add": [
+    {
+      "reason": "X-Content-Type-Options Header Missing - Auth team issue (Not fixable by adding headers)",
+      "url": "http://localhost:8585/government-gateway/session/login",
+      "ruleId": 10021,
+      "newLevel": -1
+    }
+  ]
+}
