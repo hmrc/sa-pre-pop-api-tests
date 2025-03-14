@@ -14,18 +14,28 @@
  * limitations under the License.
  */
 
-package stepDefs
+package http
 
-import io.cucumber.scala.{EN, ScalaDsl}
-import models.BearerTokenType
-import org.scalatest.matchers.should.*
-import requests.LocalBearerGenerator.obtainBearerToken
+import play.api.libs.ws.StandaloneWSResponse
 
-class BearerTokenStepDefs extends ScalaDsl with EN with Matchers {
+trait HttpGetRequest extends HttpRequest {
 
-  Given("""^I have generated a bearer token (.*) for the UTR '(.*)'$""") { (bearerToken: String, utr: String) =>
-    val bearerEnum = BearerTokenType.valueOf(bearerToken)
-    obtainBearerToken(bearerEnum, utr)
+  override def executeRestCall(url: String): StandaloneWSResponse = {
+    logger.info(s"Executing GET request, on url=$url")
+
+    val response = await(
+      HttpClient
+        .createRequest(url)
+        .withHttpHeaders(headers: _*)
+        .get()
+    )
+
+    printResponse(response)
+
+    response
   }
+
+  override def executeRestWithBodyCall(url: String, body: String): StandaloneWSResponse =
+    throw new UnsupportedOperationException("Not supported")
 
 }

@@ -19,10 +19,10 @@ package stepDefs
 import io.cucumber.scala.{EN, ScalaDsl}
 import models.{Employment, IndividualIncomeResponse, PensionsAnnuitiesAndOtherStateBenefits, Response}
 import org.scalatest.matchers.should.Matchers
-import pages.CreateTestUser.createTestUserBenefits
-import pages.GetIndividualIncome.*
-import pages.LocalBearerGenerator
 import play.api.libs.json.{JsString, JsValue}
+import requests.CreateTestUser.createTestUserBenefits
+import requests.GetIndividualIncome
+import requests.GetIndividualIncome.*
 
 class IndividualIncomeStepDefs extends ScalaDsl with EN with Matchers {
 
@@ -62,8 +62,9 @@ class IndividualIncomeStepDefs extends ScalaDsl with EN with Matchers {
   Then(
     """^I should get the (.*) success status when calling individual-income with UTR: (.*) and tax year: (.*) for scenario: (.*)$"""
   ) { (statusCode: Int, utr: String, taxYear: String, scenario: String) =>
-    val response: Response                                 = getIndividualIncomeResponse(utr, taxYear)(headers: _*)
-    val jsonResponseData: JsValue                          = response.data
+    val response: Response        = new GetIndividualIncome().getIndividualIncomeResponse(utr, taxYear)
+    val jsonResponseData: JsValue = response.data
+
     val individualIncomeResponse: IndividualIncomeResponse = jsonResponseData.as[IndividualIncomeResponse]
 
     statusCode shouldBe response.status
@@ -84,9 +85,9 @@ class IndividualIncomeStepDefs extends ScalaDsl with EN with Matchers {
     val response: Response =
       statusCode match {
         case NOT_ACCEPTABLE =>
-          getIndividualIncomeResponse(utr, taxYear)("Authorization" -> LocalBearerGenerator.authBearerToken)
+          new GetIndividualIncome(headers = Seq.empty).getIndividualIncomeResponse(utr, taxYear)
         case _              =>
-          getIndividualIncomeResponse(utr, taxYear)(headers: _*)
+          new GetIndividualIncome().getIndividualIncomeResponse(utr, taxYear)
       }
 
     val jsonResponseData: JsValue = response.data

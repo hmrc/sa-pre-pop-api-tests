@@ -19,8 +19,9 @@ package stepDefs
 import io.cucumber.scala.{EN, ScalaDsl}
 import models.{IndividualBenefitsEmployment, IndividualBenefitsResponse}
 import org.scalatest.matchers.should.*
-import pages.CreateTestUser.createTestUserBenefits
-import pages.GetIndividualBenefits.*
+import requests.CreateTestUser.createTestUserBenefits
+import requests.GetIndividualBenefits.*
+import requests.GetIndividualBenefits
 import play.api.libs.json.{JsString, JsValue}
 
 class IndividualBenefitsStepDefs extends ScalaDsl with EN with Matchers {
@@ -69,7 +70,7 @@ class IndividualBenefitsStepDefs extends ScalaDsl with EN with Matchers {
   Then(
     """^I should get the (.*) success status when calling individual-benefits with UTR: (.*) and tax year: (.*) for scenario: (.*)$"""
   ) { (statusCode: Int, utr: String, taxYear: String, scenario: String) =>
-    val response = getIndividualBenefitsResponse(utr, taxYear)(headers: _*)
+    val response = new GetIndividualBenefits().getIndividualBenefitsResponse(utr, taxYear)
     response.status shouldBe statusCode
 
     val jsonResponseData = response.data
@@ -90,8 +91,9 @@ class IndividualBenefitsStepDefs extends ScalaDsl with EN with Matchers {
     val NOT_ACCEPTABLE = 406
     val response       =
       statusCode match {
-        case NOT_ACCEPTABLE => getIndividualBenefitsResponse(utr, taxYear)()
-        case _              => getIndividualBenefitsResponse(utr, taxYear)(headers: _*)
+        case NOT_ACCEPTABLE =>
+          new GetIndividualBenefits(headers = Seq.empty).getIndividualBenefitsResponse(utr, taxYear)
+        case _              => new GetIndividualBenefits().getIndividualBenefitsResponse(utr, taxYear)
       }
 
     val jsonData: JsValue = response.data

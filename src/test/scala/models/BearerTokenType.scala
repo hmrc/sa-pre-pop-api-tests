@@ -14,18 +14,10 @@
  * limitations under the License.
  */
 
-package stepDefs
+package models
 
-import io.cucumber.scala.{EN, ScalaDsl}
-import models.BearerTokenType
-import org.scalatest.matchers.should.*
-import requests.LocalBearerGenerator.obtainBearerToken
-
-class BearerTokenStepDefs extends ScalaDsl with EN with Matchers {
-
-  Given("""^I have generated a bearer token (.*) for the UTR '(.*)'$""") { (bearerToken: String, utr: String) =>
-    val bearerEnum = BearerTokenType.valueOf(bearerToken)
-    obtainBearerToken(bearerEnum, utr)
-  }
-
+enum BearerTokenType {
+  case Valid
+  case Missing
+  case Invalid
 }

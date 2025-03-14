@@ -14,26 +14,22 @@
  * limitations under the License.
  */
 
-package pages
+package requests
 
 import config.Configuration
-import org.scalatest.concurrent.{IntegrationPatience, ScalaFutures}
-import org.scalatest.matchers.should._
-import play.api.libs.ws.DefaultBodyWritables.writeableOf_String
-import http.HttpClient._
+import http.HttpPostRequest
+import models.BearerTokenType
+import models.BearerTokenType.{Invalid, Missing, Valid}
 
-object LocalBearerGenerator extends Matchers with ScalaFutures with IntegrationPatience {
+object LocalBearerGenerator extends HttpPostRequest {
+
+  override def headers: Seq[(String, String)] = Seq(
+    "Content-Type" -> "application/json"
+  )
 
   var authBearerToken = "_"
 
-  def obtainBearerToken(bearerTokenType: String, utr: String): Unit =
-    authBearerToken = bearerTokenType match {
-      case "Valid"   => getBearerLocal(utr)
-      case "Missing" => ""
-      case _         => "Bearer DUMMY"
-    }
-
-  def putBodyLocal(utr: String): String = {
+  private def putBodyLocal(utr: String): String = {
     lazy val enrolments: String =
       s""" [
          |   {
@@ -64,21 +60,25 @@ object LocalBearerGenerator extends Matchers with ScalaFutures with IntegrationP
          |  "credId": "453234543adr54hy9",
          |  "enrolments": $enrolments
          | }
-     """.stripMargin
+       """.stripMargin
 
     authPayload
   }
 
-  def getBearerLocal(utr: String): String = {
-    val body     = putBodyLocal(utr)
-    val response = createRequest(s"${Configuration.settings.AUTH_ROOT}/government-gateway/session/login")
-      .withHttpHeaders("Content-Type" -> "application/json")
-      .post(body)
-      .futureValue
-    val bearer   = response.headers("Authorization")
-
-    printResponse(response)
+  private def getBearerLocal(utr: String): String = {
+    val url: String  = s"${Configuration.settings.AUTH_ROOT}/government-gateway/session/login"
+    val body: String = putBodyLocal(utr)
+    val response     = executeRestWithBodyCall(url, body)
+    val bearer       = response.headers("Authorization")
 
     bearer.head
   }
+
+  def obtainBearerToken(bearerTokenType: BearerTokenType, utr: String): Unit =
+    authBearerToken = bearerTokenType match {
+      case Valid   => getBearerLocal(utr)
+      case Missing => ""
+      case Invalid => "Bearer DUMMY"
+    }
+
 }
