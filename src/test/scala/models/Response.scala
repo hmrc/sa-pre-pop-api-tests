@@ -1,5 +1,5 @@
 /*
- * Copyright 2024 HM Revenue & Customs
+ * Copyright 2025 HM Revenue & Customs
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,8 @@
  * limitations under the License.
  */
 
-package uk.gov.hmrc.api.specs
+package models
 
-import org.scalatest.featurespec.AnyFeatureSpec
-import org.scalatest.matchers.should.Matchers
-import org.scalatest.GivenWhenThen
+import play.api.libs.json.JsValue
 
-trait BaseSpec extends AnyFeatureSpec with GivenWhenThen with Matchers {}
+case class Response(status: Int, data: JsValue)
